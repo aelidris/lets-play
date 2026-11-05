@@ -23,7 +23,10 @@ public class RateLimitingFilter extends OncePerRequestFilter {
 
     private Bucket resolveBucket(String clientIp) {
         return cache.computeIfAbsent(clientIp, k -> {
-            Bandwidth limit = Bandwidth.classic(20, Refill.greedy(20, Duration.ofMinutes(1)));
+            Bandwidth limit = Bandwidth.builder()
+                    .capacity(20)
+                    .refillGreedy(20, Duration.ofMinutes(1))
+                    .build();
             return Bucket.builder().addLimit(limit).build();
         });
     }
