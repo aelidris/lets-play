@@ -53,7 +53,7 @@ mvn clean package -DskipTests
 mvn spring-boot:run
 ```
 
-The server will start on **`http://localhost:8080`**.
+The server will start on **`https://localhost:8080`**.
 
 ---
 
@@ -77,7 +77,7 @@ The server will start on **`http://localhost:8080`**.
 
 ### 1. Register a Normal User
 - **HTTP Method:** `POST`
-- **URL:** `http://localhost:8080/api/auth/register`
+- **URL:** `https://localhost:8080/api/auth/register`
 - **Headers:** `Content-Type: application/json`
 - **Body (JSON):**
 ```json
@@ -94,7 +94,7 @@ The server will start on **`http://localhost:8080`**.
 
 ### 2. Register an Admin User
 - **HTTP Method:** `POST`
-- **URL:** `http://localhost:8080/api/auth/register`
+- **URL:** `https://localhost:8080/api/auth/register`
 - **Headers:** `Content-Type: application/json`
 - **Body (JSON):**
 ```json
@@ -111,7 +111,7 @@ The server will start on **`http://localhost:8080`**.
 
 ### 3. Login to Obtain JWT Token
 - **HTTP Method:** `POST`
-- **URL:** `http://localhost:8080/api/auth/login`
+- **URL:** `https://localhost:8080/api/auth/login`
 - **Headers:** `Content-Type: application/json`
 - **Body (JSON):**
 ```json
@@ -135,7 +135,7 @@ The server will start on **`http://localhost:8080`**.
 
 ### 4. Create a Product (Authenticated User)
 - **HTTP Method:** `POST`
-- **URL:** `http://localhost:8080/products`
+- **URL:** `https://localhost:8080/products`
 - **Headers:** 
   - `Content-Type: application/json`
   - `Authorization: Bearer <YOUR_JWT_TOKEN>`
@@ -153,14 +153,14 @@ The server will start on **`http://localhost:8080`**.
 
 ### 5. Get All Products (Public — No Auth Needed)
 - **HTTP Method:** `GET`
-- **URL:** `http://localhost:8080/products`
+- **URL:** `https://localhost:8080/products`
 - **Expected Status:** `200 OK`
 
 ---
 
 ### 6. Update Product (Owner / Admin Only)
 - **HTTP Method:** `PUT`
-- **URL:** `http://localhost:8080/products/{PRODUCT_ID}`
+- **URL:** `https://localhost:8080/products/{PRODUCT_ID}`
 - **Headers:** `Authorization: Bearer <YOUR_JWT_TOKEN>`
 - **Body (JSON):**
 ```json
@@ -176,7 +176,7 @@ The server will start on **`http://localhost:8080`**.
 
 ### 7. Delete Product (Owner / Admin Only)
 - **HTTP Method:** `DELETE`
-- **URL:** `http://localhost:8080/products/{PRODUCT_ID}`
+- **URL:** `https://localhost:8080/products/{PRODUCT_ID}`
 - **Headers:** `Authorization: Bearer <YOUR_JWT_TOKEN>`
 - **Expected Status:** `204 No Content`
 
@@ -184,7 +184,7 @@ The server will start on **`http://localhost:8080`**.
 
 ### 8. Admin Endpoint: Get All Users (Admin Only)
 - **HTTP Method:** `GET`
-- **URL:** `http://localhost:8080/api/users`
+- **URL:** `https://localhost:8080/api/users`
 - **Headers:** `Authorization: Bearer <ADMIN_JWT_TOKEN>`
 - **Expected Status:** `200 OK` *(Returns `403 Forbidden` if accessed by standard user)*
 
