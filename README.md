@@ -199,3 +199,12 @@ All API errors are globally caught and returned as clean JSON responses:
 - `403 Forbidden` — Accessing restricted resources (e.g., standard user accessing admin endpoints).
 - `404 Not Found` — Resource missing (e.g., product/user ID not found).
 - `429 Too Many Requests` — Exceeding Bucket4j rate limit threshold.
+
+## 🔒 Security & SSL Configuration
+
+### 1. Generate SSL Certificate Keystore
+You can generate a local PKCS12 keystore using Java's `keytool` utility:
+
+```bash
+keytool -genkeypair -alias letsplay -keyalg RSA -keysize 2048 -storetype PKCS12 -keystore keystore.p12 -validity 365
+```
