@@ -50,6 +50,10 @@ public class UserService {
             user.setPassword(passwordEncoder.encode(request.getPassword()));
         }
 
+        if (isAdmin && request.getRole() != null && !request.getRole().isEmpty()) {
+            user.setRole(request.getRole());
+        }
+
         User updatedUser = userRepository.save(user);
         return mapToResponse(updatedUser);
     }
