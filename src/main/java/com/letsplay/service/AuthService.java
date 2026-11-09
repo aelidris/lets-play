@@ -57,8 +57,7 @@ public class AuthService {
                 (org.springframework.security.core.userdetails.UserDetails) authentication.getPrincipal();
         
         String token = jwtUtils.generateToken(userDetails);
-        String role = userDetails.getAuthorities().iterator().next().getAuthority();
 
-        return new AuthResponse(token, userDetails.getUsername(), role);
+        return new AuthResponse(token);
     }
 }
