@@ -3,10 +3,13 @@ package com.letsplay.controller;
 import com.letsplay.dto.ProductRequest;
 import com.letsplay.dto.ProductResponse;
 import com.letsplay.service.ProductService;
+
+import jakarta.annotation.security.PermitAll;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,11 +23,13 @@ public class ProductController {
     private final ProductService productService;
 
     @GetMapping
+    @PermitAll
     public ResponseEntity<List<ProductResponse>> getAllProducts() {
         return ResponseEntity.ok(productService.getAllProducts());
     }
 
     @GetMapping("/{id}")
+    @PostAuthorize("returnObject.body != null")
     public ResponseEntity<ProductResponse> getProductById(@PathVariable String id) {
         return ResponseEntity.ok(productService.getProductById(id));
     }
