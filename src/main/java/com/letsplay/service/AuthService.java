@@ -28,8 +28,7 @@ public class AuthService {
             throw new IllegalArgumentException("Email is already in use");
         }
 
-        String role = (request.getRole() != null && request.getRole().equalsIgnoreCase("ADMIN")) 
-                ? "ROLE_ADMIN" : "ROLE_USER";
+        String role = "ROLE_USER";
 
         User user = User.builder()
                 .name(request.getName())
