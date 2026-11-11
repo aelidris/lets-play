@@ -19,8 +19,16 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register")
-    public ResponseEntity<UserResponse> register(@Valid @RequestBody RegisterRequest request) {
-        return new ResponseEntity<>(authService.register(request), HttpStatus.CREATED);
+    public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request) {
+        try {
+            UserResponse response = authService.register(request);
+            return new ResponseEntity<>(response, HttpStatus.CREATED);
+        } catch (RuntimeException ex) {
+            if (ex.getMessage().contains("Email is already in use")) {
+                return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+            }
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+        }
     }
 
     @PostMapping("/login")

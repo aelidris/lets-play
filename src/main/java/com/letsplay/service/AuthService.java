@@ -25,7 +25,7 @@ public class AuthService {
 
     public UserResponse register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new IllegalArgumentException("Email is already in use");
+            throw new RuntimeException("Email is already in use");
         }
 
         String role = "ROLE_USER";
