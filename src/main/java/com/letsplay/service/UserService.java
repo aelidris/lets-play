@@ -2,6 +2,8 @@ package com.letsplay.service;
 
 import com.letsplay.dto.RegisterRequest;
 import com.letsplay.dto.UserResponse;
+import com.letsplay.exception.DuplicateEmailException;
+import com.letsplay.exception.ResourceNotFoundException;
 import com.letsplay.model.User;
 import com.letsplay.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -28,19 +30,24 @@ public class UserService {
 
     public UserResponse getUserById(String id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
         return mapToResponse(user);
     }
 
     public UserResponse updateUser(String id, RegisterRequest request, boolean isAdmin, String currentUserEmail) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
 
         User currentUser = userRepository.findByEmail(currentUserEmail)
                 .orElseThrow(() -> new UsernameNotFoundException("Current user not found"));
 
         if (!isAdmin && !user.getId().equals(currentUser.getId())) {
             throw new AccessDeniedException("You are not authorized to update this user profile");
+        }
+
+        if (request.getEmail() != null && !user.getEmail().equalsIgnoreCase(request.getEmail())
+                && userRepository.existsByEmail(request.getEmail())) {
+            throw new DuplicateEmailException("Email is already in use");
         }
 
         user.setName(request.getName());
@@ -60,7 +67,7 @@ public class UserService {
 
     public void deleteUser(String id) {
         if (!userRepository.existsById(id)) {
-            throw new UsernameNotFoundException("User not found with id: " + id);
+            throw new ResourceNotFoundException("User not found with id: " + id);
         }
         userRepository.deleteById(id);
     }

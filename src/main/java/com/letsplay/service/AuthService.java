@@ -4,6 +4,7 @@ import com.letsplay.dto.AuthResponse;
 import com.letsplay.dto.LoginRequest;
 import com.letsplay.dto.RegisterRequest;
 import com.letsplay.dto.UserResponse;
+import com.letsplay.exception.DuplicateEmailException;
 import com.letsplay.model.User;
 import com.letsplay.repository.UserRepository;
 import com.letsplay.security.JwtUtils;
@@ -24,8 +25,9 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
 
     public UserResponse register(RegisterRequest request) {
-        if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email is already in use");
+        String normalizedEmail = request.getEmail().trim().toLowerCase();
+        if (userRepository.existsByEmail(normalizedEmail)) {
+            throw new DuplicateEmailException("Email is already in use");
         }
 
         String role = "ROLE_USER";
@@ -49,12 +51,11 @@ public class AuthService {
 
     public AuthResponse login(LoginRequest request) {
         Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
-        );
+                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
 
-        org.springframework.security.core.userdetails.UserDetails userDetails = 
-                (org.springframework.security.core.userdetails.UserDetails) authentication.getPrincipal();
-        
+        org.springframework.security.core.userdetails.UserDetails userDetails = (org.springframework.security.core.userdetails.UserDetails) authentication
+                .getPrincipal();
+
         String token = jwtUtils.generateToken(userDetails);
 
         return new AuthResponse(token);

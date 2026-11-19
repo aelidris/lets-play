@@ -2,12 +2,12 @@ package com.letsplay.service;
 
 import com.letsplay.dto.ProductRequest;
 import com.letsplay.dto.ProductResponse;
+import com.letsplay.exception.ResourceNotFoundException;
 import com.letsplay.model.Product;
 import com.letsplay.model.User;
 import com.letsplay.repository.ProductRepository;
 import com.letsplay.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -20,13 +20,7 @@ import java.util.stream.Collectors;
 public class ProductService {
 
     private final UserRepository userRepository;
-    
-    private ProductRepository productRepository;
-
-    @Autowired
-    public void setProductRepository(ProductRepository productRepository) {
-        this.productRepository = productRepository;
-    }
+    private final ProductRepository productRepository;
 
     public List<ProductResponse> getAllProducts() {
         return productRepository.findAll().stream()
@@ -36,7 +30,7 @@ public class ProductService {
 
     public ProductResponse getProductById(String id) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Product not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
         return mapToResponse(product);
     }
 
@@ -57,7 +51,7 @@ public class ProductService {
 
     public ProductResponse updateProduct(String id, ProductRequest request, String userEmail, boolean isAdmin) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Product not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
 
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
@@ -76,7 +70,7 @@ public class ProductService {
 
     public void deleteProduct(String id, String userEmail, boolean isAdmin) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Product not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
 
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
