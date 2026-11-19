@@ -1,6 +1,6 @@
 # Let's Play — RESTful CRUD API
 
-A secure, scalable, and fully compliant **RESTful CRUD API** built with **Spring Boot 3.2.5** and **MongoDB**. The system manages **Users** and **Products** with role-based access control (RBAC), JWT authentication, rate limiting, and global error handling.
+A secure, scalable, and fully compliant **RESTful CRUD API** built with **Spring Boot 3.2.5** and **MongoDB**. The system manages **Users** and **Products** with role-based access control (RBAC), JWT authentication, strict input validation, rate limiting, and global error handling.
 
 ---
 
@@ -33,7 +33,7 @@ mkdir -p ~/mongodb/data
 Create a `.env` file in the root directory of the project (same directory as `pom.xml`):
 
 ```env
-SPRING_DATA_MONGODB_URI=mongodb://localhost:27017/your_database_name
+SPRING_DATA_MONGODB_URI=mongodb://localhost:27017/lets_play_db
 JWT_SECRET=your_secret_key_here_must_be_at_least_256_bits
 JWT_EXPIRATION=86400000
 ```
@@ -57,7 +57,7 @@ The server will start on **`https://localhost:8080`**.
 
 ---
 
-## Security & Role-Based Access Control (RBAC)
+## Security, Validation & Role-Based Access Control (RBAC)
 
 | Role | Permissions |
 | :--- | :--- |
@@ -65,7 +65,9 @@ The server will start on **`https://localhost:8080`**.
 | **ROLE_USER** | Perform CRUD on **their own** products (`POST`, `PUT`, `DELETE`) |
 | **ROLE_ADMIN** | Manage **all** products + full access to User Management (`GET /api/users`, `DELETE /api/users/{id}`) |
 
-### Features Included:
+### Security & Validation Rules Included:
+- **Strong Password Policy:** Passwords must be **8–100 characters** long and include at least **one uppercase letter**, **one lowercase letter**, **one digit**, and **one special character** (e.g., `UserSecure123!`).
+- **Strict Email Validation:** Enforces standard `local@domain.tld` formatting (rejects invalid symbols such as `+`, consecutive dots, numeric-only local parts, and missing TLDs) and checks for case-insensitive duplicates.
 - **BCrypt Password Hashing:** Passwords are encrypted before persisting to MongoDB.
 - **JWT Authentication:** Stateless Bearer tokens passed via `Authorization: Bearer <TOKEN>`.
 - **Rate Limiting (Bucket4j):** Protects against brute-force attacks (20 requests/min per IP).
@@ -84,7 +86,7 @@ The server will start on **`https://localhost:8080`**.
 {
   "name": "John Doe",
   "email": "john@example.com",
-  "password": "password123",
+  "password": "UserSecure123!",
   "role": "USER"
 }
 ```
@@ -101,7 +103,7 @@ The server will start on **`https://localhost:8080`**.
 {
   "name": "Admin User",
   "email": "admin@example.com",
-  "password": "adminpassword123",
+  "password": "AdminSecurePassword123!",
   "role": "ADMIN"
 }
 ```
@@ -117,7 +119,7 @@ The server will start on **`https://localhost:8080`**.
 ```json
 {
   "email": "john@example.com",
-  "password": "password123"
+  "password": "UserSecure123!"
 }
 ```
 - **Expected Status:** `200 OK`
@@ -192,15 +194,19 @@ The server will start on **`https://localhost:8080`**.
 
 ## Error Handling & Status Codes
 
-All API errors are globally caught and returned as clean JSON responses:
+All API errors are globally caught and returned as clean, structured JSON responses:
 
-- `400 Bad Request` — Validation failures (e.g. invalid email format, missing fields).
-- `401 Unauthorized` — Invalid credentials or missing JWT token.
-- `403 Forbidden` — Accessing restricted resources (e.g., standard user accessing admin endpoints).
-- `404 Not Found` — Resource missing (e.g., product/user ID not found).
+- `400 Bad Request` — Validation failures (e.g., weak password, invalid email format, malformed JSON, missing fields).
+- `401 Unauthorized` — Invalid credentials or missing/expired JWT token.
+- `403 Forbidden` — Accessing restricted resources (e.g., standard user accessing admin endpoints or modifying another user's product).
+- `404 Not Found` — Resource missing (e.g., product or user ID not found).
+- `409 Conflict` — Duplicate email registration or update attempt.
 - `429 Too Many Requests` — Exceeding Bucket4j rate limit threshold.
+- `500 Internal Server Error` — Unexpected server-side error.
 
-## 🔒 Security & SSL Configuration
+---
+
+## Security & SSL Configuration
 
 ### 1. Generate SSL Certificate Keystore
 You can generate a local PKCS12 keystore using Java's `keytool` utility:
