@@ -58,7 +58,12 @@ public class UserService {
         }
 
         if (isAdmin && request.getRole() != null && !request.getRole().isEmpty()) {
-            user.setRole(request.getRole());
+            String requestedRole = request.getRole().trim();
+            String currentRole = user.getRole() != null ? user.getRole().trim() : "";
+            if (user.getId().equals(currentUser.getId()) && !requestedRole.equalsIgnoreCase(currentRole)) {
+                throw new AccessDeniedException("Admins cannot change their own role");
+            }
+            user.setRole(requestedRole);
         }
 
         User updatedUser = userRepository.save(user);
