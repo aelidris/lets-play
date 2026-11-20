@@ -1,11 +1,14 @@
 package com.letsplay.dto;
 
+import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+
+import java.math.BigDecimal;
 
 @Data
 public class ProductRequest {
@@ -21,5 +24,6 @@ public class ProductRequest {
 
     @NotNull(message = "Price is required")
     @Positive(message = "Price must be greater than 0")
-    private Double price;
+    @Digits(integer = 12, fraction = 5, message = "Price must have up to 12 integer digits and 5 decimal places")
+    private BigDecimal price;
 }

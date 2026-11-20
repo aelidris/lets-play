@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
+import java.math.BigDecimal;
 
 @Data
 @Builder
@@ -24,8 +25,8 @@ public class Product {
     private String description;
 
     @Field
-    private Double price;
+    private BigDecimal price;
 
     @Field
-    private String userId; // Owner User ID
+    private String userId;
 }
