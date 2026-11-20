@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,20 +30,23 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
+    @PermitAll
     @PostAuthorize("returnObject.body != null")
     public ResponseEntity<ProductResponse> getProductById(@PathVariable String id) {
         return ResponseEntity.ok(productService.getProductById(id));
     }
 
     @PostMapping
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ProductResponse> createProduct(
-            @Valid @RequestBody ProductRequest request, 
+            @Valid @RequestBody ProductRequest request,
             Authentication authentication) {
         String email = authentication.getName();
         return new ResponseEntity<>(productService.createProduct(request, email), HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ProductResponse> updateProduct(
             @PathVariable String id,
             @Valid @RequestBody ProductRequest request,
@@ -54,6 +58,7 @@ public class ProductController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> deleteProduct(
             @PathVariable String id,
             Authentication authentication) {

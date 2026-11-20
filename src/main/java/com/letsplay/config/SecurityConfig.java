@@ -1,5 +1,6 @@
 package com.letsplay.config;
 
+import com.letsplay.security.EndpointAuthCheckFilter;
 import com.letsplay.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -48,7 +49,10 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, RateLimitingFilter rateLimitingFilter) throws Exception {
+    public SecurityFilterChain filterChain(
+            HttpSecurity http,
+            RateLimitingFilter rateLimitingFilter,
+            EndpointAuthCheckFilter endpointAuthCheckFilter) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(org.springframework.security.config.Customizer.withDefaults())
@@ -69,11 +73,13 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/products").permitAll()
-                        .anyRequest().authenticated());
+                        .requestMatchers(HttpMethod.GET, "/products/**").permitAll()
+                        .anyRequest().permitAll());
 
         http.authenticationProvider(authenticationProvider());
         http.addFilterBefore(rateLimitingFilter, UsernamePasswordAuthenticationFilter.class);
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        http.addFilterAfter(endpointAuthCheckFilter, JwtAuthenticationFilter.class);
 
         return http.build();
     }
