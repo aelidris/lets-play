@@ -58,16 +58,25 @@ public class UserService {
         }
 
         if (isAdmin && request.getRole() != null && !request.getRole().isEmpty()) {
-            String requestedRole = request.getRole().trim();
-            String currentRole = user.getRole() != null ? user.getRole().trim() : "";
-            if (user.getId().equals(currentUser.getId()) && !requestedRole.equalsIgnoreCase(currentRole)) {
+            String normalizedRequested = normalizeRole(request.getRole());
+            String normalizedCurrent = normalizeRole(user.getRole());
+
+            if (user.getId().equals(currentUser.getId()) && !normalizedRequested.equals(normalizedCurrent)) {
                 throw new AccessDeniedException("Admins cannot change their own role");
             }
-            user.setRole(requestedRole);
+            user.setRole(normalizedRequested);
         }
 
         User updatedUser = userRepository.save(user);
         return mapToResponse(updatedUser);
+    }
+
+    private String normalizeRole(String role) {
+        if (role == null || role.isBlank()) {
+            return "ROLE_USER";
+        }
+        String cleaned = role.trim().toUpperCase();
+        return cleaned.startsWith("ROLE_") ? cleaned : "ROLE_" + cleaned;
     }
 
     public void deleteUser(String id) {

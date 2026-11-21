@@ -29,18 +29,16 @@ public class ProductService {
     }
 
     public ProductResponse getProductById(String id) {
-        Product product = productRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
+        Product product = findProductOrThrow(id);
         return mapToResponse(product);
     }
 
     public ProductResponse createProduct(ProductRequest request, String userEmail) {
-        User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        User user = findUserByEmailOrThrow(userEmail);
 
         Product product = Product.builder()
-                .name(request.getName())
-                .description(request.getDescription())
+                .name(normalizeSpaces(request.getName()))
+                .description(normalizeSpaces(request.getDescription()))
                 .price(request.getPrice())
                 .userId(user.getId())
                 .build();
@@ -50,18 +48,10 @@ public class ProductService {
     }
 
     public ProductResponse updateProduct(String id, ProductRequest request, String userEmail, boolean isAdmin) {
-        Product product = productRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
+        Product product = findProductAndVerifyAccess(id, userEmail, isAdmin, "update");
 
-        User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-
-        if (!isAdmin && !product.getUserId().equals(user.getId())) {
-            throw new AccessDeniedException("You are not authorized to update this product");
-        }
-
-        product.setName(request.getName());
-        product.setDescription(request.getDescription());
+        product.setName(normalizeSpaces(request.getName()));
+        product.setDescription(normalizeSpaces(request.getDescription()));
         product.setPrice(request.getPrice());
 
         Product updatedProduct = productRepository.save(product);
@@ -69,17 +59,35 @@ public class ProductService {
     }
 
     public void deleteProduct(String id, String userEmail, boolean isAdmin) {
-        Product product = productRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
+        Product product = findProductAndVerifyAccess(id, userEmail, isAdmin, "delete");
+        productRepository.delete(product);
+    }
 
-        User user = userRepository.findByEmail(userEmail)
+    private Product findProductOrThrow(String id) {
+        return productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
+    }
+
+    private User findUserByEmailOrThrow(String email) {
+        return userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    }
+
+    private Product findProductAndVerifyAccess(String id, String userEmail, boolean isAdmin, String action) {
+        Product product = findProductOrThrow(id);
+        User user = findUserByEmailOrThrow(userEmail);
 
         if (!isAdmin && !product.getUserId().equals(user.getId())) {
-            throw new AccessDeniedException("You are not authorized to delete this product");
+            throw new AccessDeniedException("You are not authorized to " + action + " this product");
         }
+        return product;
+    }
 
-        productRepository.delete(product);
+    private String normalizeSpaces(String value) {
+        if (value == null) {
+            return null;
+        }
+        return value.trim().replaceAll("\\s+", " ");
     }
 
     private ProductResponse mapToResponse(Product product) {
