@@ -34,7 +34,7 @@ public class AuthService {
 
         User user = User.builder()
                 .name(request.getName())
-                .email(request.getEmail())
+                .email(normalizedEmail)
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(role)
                 .build();
@@ -50,11 +50,12 @@ public class AuthService {
     }
 
     public AuthResponse login(LoginRequest request) {
+        String normalizedEmail = request.getEmail().trim().toLowerCase();
         Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
+                new UsernamePasswordAuthenticationToken(normalizedEmail, request.getPassword()));
 
-        org.springframework.security.core.userdetails.UserDetails userDetails = (org.springframework.security.core.userdetails.UserDetails) authentication
-                .getPrincipal();
+        org.springframework.security.core.userdetails.UserDetails userDetails =
+                (org.springframework.security.core.userdetails.UserDetails) authentication.getPrincipal();
 
         String token = jwtUtils.generateToken(userDetails);
 

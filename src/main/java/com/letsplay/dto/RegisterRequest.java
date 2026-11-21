@@ -1,17 +1,21 @@
 package com.letsplay.dto;
 
+import com.fasterxml.jackson.annotation.JsonSetter;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.Setter;
 
 @Data
 public class RegisterRequest {
 
     @NotBlank(message = "Name is required")
     @Size(min = 2, max = 50, message = "Name must be between 2 and 50 characters")
-    @Pattern(regexp = "^[A-Za-zÀ-ÿ]+(?:[ '\\-][A-Za-zÀ-ÿ]+)*$", message = "Name must contain only letters and spaces")
+    @Pattern(regexp = "^[A-Za-z]+( [A-Za-z]+)*$", message = "Name must contain only letters")
+    @Setter(AccessLevel.NONE)
     private String name;
 
     @NotBlank(message = "Email is required")
@@ -27,4 +31,13 @@ public class RegisterRequest {
 
     @Pattern(regexp = "^(ROLE_USER|ROLE_ADMIN|USER|ADMIN)$", message = "Role must be a valid role")
     private String role;
+
+    @JsonSetter("name")
+    public void setName(String name) {
+        if (name == null) {
+            this.name = null;
+            return;
+        }
+        this.name = name.trim().replaceAll("\\s+", " ");
+    }
 }
