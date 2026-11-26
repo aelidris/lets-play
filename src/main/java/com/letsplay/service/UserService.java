@@ -79,11 +79,18 @@ public class UserService {
         return cleaned.startsWith("ROLE_") ? cleaned : "ROLE_" + cleaned;
     }
 
-    public void deleteUser(String id) {
-        if (!userRepository.existsById(id)) {
-            throw new ResourceNotFoundException("User not found with id: " + id);
+    public void deleteUser(String id, String currentUserEmail) {
+        User targetUser = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+
+        User currentUser = userRepository.findByEmail(currentUserEmail)
+                .orElseThrow(() -> new UsernameNotFoundException("Current user not found"));
+
+        if (targetUser.getId().equals(currentUser.getId())) {
+            throw new AccessDeniedException("Admins cannot delete their own account");
         }
-        userRepository.deleteById(id);
+
+        userRepository.delete(targetUser);
     }
 
     private UserResponse mapToResponse(User user) {

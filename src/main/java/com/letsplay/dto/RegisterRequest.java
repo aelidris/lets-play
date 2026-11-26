@@ -13,8 +13,8 @@ import lombok.Setter;
 public class RegisterRequest {
 
     @NotBlank(message = "Name is required")
-    @Size(min = 2, max = 50, message = "Name must be between 2 and 50 characters")
-    @Pattern(regexp = "^[A-Za-z]+( [A-Za-z]+)*$", message = "Name must contain only letters")
+    @Size(min = 2, max = 20, message = "Name must be between 2 and 20 characters")
+    @Pattern(regexp = "^[A-Za-z]+(?: [A-Za-z]+){0,3}$", message = "Name must contain only letters with at most 3 spaces")
     @Setter(AccessLevel.NONE)
     private String name;
 

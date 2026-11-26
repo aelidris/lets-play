@@ -37,7 +37,7 @@ public class UserController {
             @PathVariable String id,
             @Valid @RequestBody RegisterRequest request,
             Authentication authentication) {
-        
+
         boolean isAdmin = authentication.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
 
@@ -47,8 +47,8 @@ public class UserController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Void> deleteUser(@PathVariable String id) {
-        userService.deleteUser(id);
+    public ResponseEntity<Void> deleteUser(@PathVariable String id, Authentication authentication) {
+        userService.deleteUser(id, authentication.getName());
         return ResponseEntity.noContent().build();
     }
 }
